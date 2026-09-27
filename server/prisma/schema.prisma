@@ -1,0 +1,93 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Seller {
+  id                String  @id @default(uuid())
+  businessName      String
+  gstNumber         String?
+  pan               String?
+  address           String?
+  amazonConnected   Boolean @default(false)
+  amazonRefreshToken String?
+  amazonAccessToken  String?
+  amazonTokenExpiry  DateTime?
+  amazonSellerId     String?
+
+  flipkartConnected  Boolean @default(false)
+  flipkartRefreshToken String?
+  flipkartAccessToken  String?
+  flipkartTokenExpiry  DateTime?
+}
+
+model Supplier {
+  id                  String    @id @default(uuid())
+  businessName        String
+  contactPerson       String
+  phone               String
+  email               String?
+  street              String
+  city                String
+  state               String
+  pincode             String
+  paymentTerms        String
+  notificationChannel String
+  shiprocketPickupId  String?
+  products            Product[]
+}
+
+model Product {
+  id                String              @id @default(uuid())
+  sku               String              @unique
+  title             String
+  costPrice         Float
+  sellPrice         Float
+  supplierId        String
+  supplier          Supplier            @relation(fields: [supplierId], references: [id])
+  stockQuantity     Int                 @default(0)
+  lowStockThreshold Int                 @default(10)
+  weight            Float?
+  dimensions        String?             // e.g., "10x10x10 cm"
+  lineItems         OrderLineItem[]
+  auditLogs         InventoryAuditLog[]
+}
+
+model Order {
+  id                 String          @id @default(uuid())
+  marketplace        String          // 'Amazon' | 'Flipkart'
+  marketplaceOrderId String          @unique
+  customerName       String
+  shippingAddress    String
+  phone              String?
+  status             String          // 'Received' | 'InventoryDeducted' | 'SupplierNotified' | 'ShipmentBooked' | 'AWBAssigned' | 'InTransit' | 'Delivered'
+  shiprocketOrderId  String?
+  awbNumber          String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  lineItems          OrderLineItem[]
+}
+
+model OrderLineItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+}
+
+model InventoryAuditLog {
+  id             String   @id @default(uuid())
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  reason         String
+  beforeQuantity Int
+  afterQuantity  Int
+  source         String   // 'Manual' | 'OrderTriggered'
+  timestamp      DateTime @default(now())
+}
