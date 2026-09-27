@@ -22,7 +22,7 @@ export function Layout() {
       <aside className="w-64 bg-surface border-r border-border flex flex-col transition-all">
         <div className="h-16 flex items-center px-6 border-b border-border">
           <Box className="w-6 h-6 text-primary mr-3" />
-          <span className="text-xl font-bold text-text tracking-wide">FulfillFlow</span>
+          <span className="text-xl font-bold text-text tracking-wide">MARGINN</span>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1">
